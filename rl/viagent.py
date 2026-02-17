@@ -35,10 +35,22 @@ class ValueIterationAgent:
                 best_value = float("-inf")
 
                 for action in self._env.actions:
-                    next_state = self._env.next_state(state, action)
-                    reward = self._env.reward(next_state)
+                    # For simple deterministic environment we can use direct next state and reward
+                    # calculation here:
+                    # next_state = self._env.next_state(state, action)
+                    # reward = self._env.reward(state, action, next_state)
+                    # value = reward + self._gamma * values[next_state]
 
-                    value = reward + self._gamma * values[next_state]
+                    # But for more complex environment we need to calculate value using transition
+                    # probabilities:
+
+                    value = 0.0
+
+                    for transition in self._env.get_transition(state, action):
+                        value += transition.probability * (
+                            transition.reward + self._gamma * values[transition.next_state]
+                        )
+
                     best_value = max(best_value, value)
 
                 delta = max(delta, abs(values[state] - best_value))
@@ -59,13 +71,23 @@ class ValueIterationAgent:
             best_value = float("-inf")
 
             for action in self._env.actions:
-                next_state = self._env.next_state(state, action)
-                reward = self._env.reward(next_state)
+                # we can not use direct values[next_state] here because we need to use reward
+                # instead of value for policy evaluation for example, terminal state has zero value
+                # but valuable reward. See doc/vi_policy_calc.png for more details.
 
-                # we can not use direct values[next_state] here because we need to use reward instead of value for policy evaluation
-                # for example, terminal state has zero value but valuable reward. See doc/vi_policy_calc.png for more details.
+                # For simple deterministic environment we can use direct next state and reward
+                # calculation here:
+                # next_state = self._env.next_state(state, action)
+                # reward = self._env.reward(state, action, next_state)
+                # value = reward + self._gamma * values[next_state]
 
-                value = reward + self._gamma * values[next_state]
+                # But for more complex environment we need to calculate value using transition
+                # probabilities:
+
+                value = 0.0
+
+                for transition in self._env.get_transition(state, action):
+                    value += transition.probability * (transition.reward + self._gamma * values[transition.next_state])
 
                 if value > best_value:
                     best_value = value

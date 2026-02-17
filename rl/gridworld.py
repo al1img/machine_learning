@@ -1,5 +1,6 @@
 """A simple grid world environment for reinforcement learning."""
 
+from dataclasses import dataclass
 from enum import IntEnum
 
 State = tuple[int, int]
@@ -12,6 +13,15 @@ class Action(IntEnum):
     RIGHT = 1
     DOWN = 2
     LEFT = 3
+
+
+@dataclass(frozen=True)
+class Transition:
+    """Represents a transition in the grid world environment."""
+
+    probability: float
+    next_state: State
+    reward: float
 
 
 class GridWorld:
@@ -66,9 +76,30 @@ class GridWorld:
 
         return (r, c)
 
-    def reward(self, state: State) -> float:
-        """Returns state reward."""
-        if self.is_terminal(state):
+    def reward(self, cur_state: State, action: Action, next_state: State) -> float:
+        """
+        Returns the reward for taking the given action in the current state and transitioning to the next state.
+        This is general case where the reward can depend on the current state, action, and next state.
+        In this simple grid world, we will return a fixed step reward for non-terminal transitions and the terminal
+        reward for transitions into terminal states.
+        """
+        _ = action  # Unused in this simple implementation, but included for generality.
+
+        if self.is_terminal(cur_state):
+            return 0.0
+
+        if self.is_terminal(next_state):
             return self._terminal_reward
 
         return self._step_reward
+
+    def get_transition(self, state: State, action: Action) -> list[Transition]:
+        """Returns a list of possible transitions for the given state and action."""
+
+        next_state = self.next_state(state, action)
+        reward = self.reward(state, action, next_state)
+
+        # In this simple grid world, we assume deterministic transitions, so we return a single
+        # transition with probability 1.0. In a more complex environment, this method could return
+        # multiple transitions with different probabilities.
+        return [Transition(1.0, next_state, reward)]
