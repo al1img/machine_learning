@@ -1,6 +1,7 @@
 """Reinforcement learning algorithms for GridWorld environment."""
 
 from gridworld import GridWorld
+from mcagent import MonteCarloAgent
 from piagent import PolicyIterationAgent
 from utils import format_policy, format_values
 from viagent import ValueIterationAgent
@@ -28,6 +29,17 @@ def main() -> None:
     print(format_values(values, env))
 
     print("\nPolicy Iteration Policy:\n")
+    print(format_policy(policy, env))
+
+    agent = MonteCarloAgent(env)
+    iters, values, policy = agent.train()
+
+    print(f"\nMonte Carlo converged in {iters} iterations.\n")
+
+    print("\nMonte Carlo Values:\n")
+    print(format_values(values, env))
+
+    print("\nMonte Carlo Policy:\n")
     print(format_policy(policy, env))
 
 
