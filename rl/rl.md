@@ -26,9 +26,18 @@ Trade-off:
 
 * each iteration is expensive (full evaluation until convergence), but fewer outer iterations are needed.
 
+## Model-free
+
+### Monte Carlo
+
+* If model is not available better to estimate quality function (Q) as it is hard to calculate policy.
+* Instead of averaging value, learning rate `alpha` could be used.
+
 ## Links
 
 1. Steve Brunton. ["Reinforcement learning"](https://www.youtube.com/playlist?list=PLMrJAkhIeNNQe1JXNvaFvURxGY4gE9k74). Video course.
 2. Steve Brunton. ["Reinforcement learning"](https://faculty.washington.edu/sbrunton/databookRL.pdf). Data book.
-3. Invisible AI Guru Jii. ["Dynamic Programming, Policy Iteration, and Value Iteration in Reinforcement Learning"](https://medium.com/@apukumargiri1/dynamic-programming-policy-iteration-and-value-iteration-in-reinforcement-learning-675fee67905c). Medium.
-4. a7med3laa. ["DRL-Books-resources"](https://github.com/a7med3laa/DRL-Books-resources). Github.
+3. Richard S. Sutton and Andrew G. Barto ["Reinforcement Learning: An Introduction"](https://www.andrew.cmu.edu/course/10-703/textbook/BartoSutton.pdf)
+4. Invisible AI Guru Jii. ["Dynamic Programming, Policy Iteration, and Value Iteration in Reinforcement Learning"](https://medium.com/@apukumargiri1/dynamic-programming-policy-iteration-and-value-iteration-in-reinforcement-learning-675fee67905c). Medium.
+5. a7med3laa. ["DRL-Books-resources"](https://github.com/a7med3laa/DRL-Books-resources). Github.
+6. Invisible AI Guru Jii. ["Monte Carlo Methods in Reinforcement Learning"](https://medium.com/@apukumargiri1/monte-carlo-methods-in-reinforcement-learning-04a8e406b848)

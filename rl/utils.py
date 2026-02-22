@@ -18,7 +18,7 @@ def format_policy(policy: dict[State, Action], env: GridWorld) -> str:
             if env.is_terminal(state):
                 row.append("T")
             else:
-                row.append(arrows[policy[state]])
+                row.append(arrows[policy.get(state, Action.UP)])
 
         rows.append(" ".join(row))
 
@@ -34,7 +34,7 @@ def format_values(values: dict[State, float], env: GridWorld) -> str:
 
         for c in range(env.size[1]):
             state = (r, c)
-            row.append(f"{values[state]:6.2f}")
+            row.append(f"{values.get(state, 0.0):6.3f}")
 
         rows.append(" ".join(row))
 
