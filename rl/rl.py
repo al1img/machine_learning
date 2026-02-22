@@ -3,6 +3,7 @@
 from gridworld import GridWorld
 from mcagent import MonteCarloAgent
 from piagent import PolicyIterationAgent
+from tdagent import TemporalDifferenceAgent
 from utils import format_policy, format_values
 from viagent import ValueIterationAgent
 
@@ -40,6 +41,17 @@ def main() -> None:
     print(format_values(values, env))
 
     print("\nMonte Carlo Policy:\n")
+    print(format_policy(policy, env))
+
+    agent = TemporalDifferenceAgent(env)
+    iters, values, policy = agent.train()
+
+    print(f"\nTemporal Difference converged in {iters} iterations.\n")
+
+    print("\nTemporal Difference Values:\n")
+    print(format_values(values, env))
+
+    print("\nTemporal Difference Policy:\n")
     print(format_policy(policy, env))
 
 

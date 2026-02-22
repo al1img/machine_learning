@@ -33,6 +33,10 @@ Trade-off:
 * If model is not available better to estimate quality function (Q) as it is hard to calculate policy.
 * Instead of averaging value, learning rate `alpha` could be used.
 
+### TD
+
+* DP, TD, and Monte Carlo methods all use some variation of generalized policy iteration (GPI).
+
 ## Links
 
 1. Steve Brunton. ["Reinforcement learning"](https://www.youtube.com/playlist?list=PLMrJAkhIeNNQe1JXNvaFvURxGY4gE9k74). Video course.
