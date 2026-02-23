@@ -3,6 +3,7 @@
 from gridworld import GridWorld
 from mcagent import MonteCarloAgent
 from piagent import PolicyIterationAgent
+from qagent import QLearningAgent
 from sarsaagent import SARSAAgent
 from tdagent import TemporalDifferenceAgent
 from utils import format_policy, format_values
@@ -64,6 +65,17 @@ def main() -> None:
     print(format_values(values, env))
 
     print("\nSARSA Policy:\n")
+    print(format_policy(policy, env))
+
+    agent = QLearningAgent(env)
+    iters, values, policy = agent.train()
+
+    print(f"\nQ-Learning converged in {iters} iterations.\n")
+
+    print("\nQ-Learning Values:\n")
+    print(format_values(values, env))
+
+    print("\nQ-Learning Policy:\n")
     print(format_policy(policy, env))
 
 

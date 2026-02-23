@@ -88,7 +88,7 @@ def calc_value_from_quality(q: dict[State, dict[Action, float]]) -> dict[State, 
     values = {}
 
     for state, actions in q.items():
-        values[state] = max(actions.values())
+        values[state] = max(actions.values(), default=0.0)
 
     return values
 
@@ -99,7 +99,7 @@ def calc_best_policy_from_quality(q: dict[State, dict[Action, float]]) -> dict[S
     best_policy = {}
 
     for state, actions in q.items():
-        best_action = max(actions, key=actions.get)
+        best_action = max(actions, key=actions.get, default=None)
         best_policy[state] = best_action
 
     return best_policy
