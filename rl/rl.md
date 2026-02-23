@@ -33,9 +33,23 @@ Trade-off:
 * If model is not available better to estimate quality function (Q) as it is hard to calculate policy.
 * Instead of averaging value, learning rate `alpha` could be used.
 
-### TD
+### TD, SARSA and Q-Learning
 
 * DP, TD, and Monte Carlo methods all use some variation of generalized policy iteration (GPI).
+
+## Comparison
+
+| Algorithm      | What it learns | Update rule                                                                   | Policy         |
+|----------------|----------------|-------------------------------------------------------------------------------|----------------|
+| **TD(0)**      | $V(s)$         | $V(s) \leftarrow V(s) + \alpha [R + \gamma V(s') - V(s)]$                     | Requires model |
+| **SARSA**      | $Q(s, a)$      | $Q(s,a) \leftarrow Q(s,a) + \alpha [R + \gamma Q(s', a') - Q(s,a)]$           | On-policy      |
+| **Q-Learning** | $Q(s, a)$      | $Q(s,a) \leftarrow Q(s,a) + \alpha [R + \gamma \max_{a'} Q(s', a') - Q(s,a)]$ | Off-policy     |
+
+## Key Differences
+
+* **SARSA** name comes from the tuple $(S, A, R, S', A')$ — the next action $a'$ is chosen by the **current policy** (on-policy).
+* **Q-Learning** uses $\max_{a'} Q(s', a')$ regardless of the action actually taken (off-policy).
+* **TD(0)** learns state values $V(s)$ and requires a model (e.g., `env.next_state()`, `env.reward()`) to derive the policy.
 
 ## Links
 
