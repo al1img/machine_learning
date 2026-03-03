@@ -1,5 +1,7 @@
 """Value Iteration Agent for GridWorld environment."""
 
+from collections import defaultdict
+
 from gridworld import Action, GridWorld, State
 
 
@@ -17,13 +19,14 @@ class ValueIterationAgent:
         self._gamma = gamma
         self._theta = theta
         self._max_iters = max_iters
+        self._values: dict[State, float] = defaultdict(float)
 
-    def train(self) -> tuple[int, dict[State, float], dict[State, Action]]:
+    def train(self) -> int:
         """Trains agent."""
 
         # calculate values
 
-        values = {state: 0.0 for state in self._env.states}
+        i = 0
 
         for i in range(self._max_iters):
             delta = 0.0
@@ -48,17 +51,27 @@ class ValueIterationAgent:
 
                     for transition in self._env.get_transition(state, action):
                         value += transition.probability * (
-                            transition.reward + self._gamma * values[transition.next_state]
+                            transition.reward + self._gamma * self._values[transition.next_state]
                         )
 
                     best_value = max(best_value, value)
 
-                delta = max(delta, abs(values[state] - best_value))
-                values[state] = best_value
+                delta = max(delta, abs(self._values[state] - best_value))
+                self._values[state] = best_value
 
             if delta < self._theta:
                 break
 
+        return i + 1
+
+    @property
+    def values(self) -> dict[State, float]:
+        """Returns state values."""
+        return dict(self._values)
+
+    @property
+    def policy(self) -> dict[State, Action]:
+        """Returns the best policy based on the calculated state values."""
         # calculate policy
 
         policy: dict[State, Action] = {}
@@ -87,7 +100,9 @@ class ValueIterationAgent:
                 value = 0.0
 
                 for transition in self._env.get_transition(state, action):
-                    value += transition.probability * (transition.reward + self._gamma * values[transition.next_state])
+                    value += transition.probability * (
+                        transition.reward + self._gamma * self._values[transition.next_state]
+                    )
 
                 if value > best_value:
                     best_value = value
@@ -95,4 +110,4 @@ class ValueIterationAgent:
 
             policy[state] = best_action
 
-        return i + 1, values, policy
+        return policy

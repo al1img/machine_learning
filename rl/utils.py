@@ -42,13 +42,73 @@ def format_values(values: dict[State, float], env: GridWorld) -> str:
     return "\n".join(rows)
 
 
+def format_state_counts(state_counts: dict[State, int], env: GridWorld) -> str:
+    """Formats state counts as a grid of numbers."""
+    rows = []
+
+    for r in range(env.size[0]):
+        row = []
+
+        for c in range(env.size[1]):
+            state = (r, c)
+            row.append(f"{state_counts.get(state, 0):6d}")
+
+        rows.append(" ".join(row))
+
+    return "\n".join(rows)
+
+
+def format_quality(q: dict[State, dict[Action, float]], env: GridWorld) -> str:
+    """Formats quality (Q) function as a grid showing action values per state.
+
+    Each cell shows Q(s, a) for all 4 actions in a compass layout:
+        ↑
+      ←   →
+        ↓
+    """
+    val_w = 6
+    cell_w = val_w * 2 + 1  # left(6) + sep(1) + right(6) = 13
+
+    rows = []
+
+    for r in range(env.size[0]):
+        top_row, mid_row, bot_row = [], [], []
+
+        for c in range(env.size[1]):
+            state = (r, c)
+            actions = q.get(state, {})
+
+            if env.is_terminal(state):
+                top_row.append(" " * cell_w)
+                mid_row.append(f"{'T':^{cell_w}}")
+                bot_row.append(" " * cell_w)
+            else:
+                up    = f"{actions.get(Action.UP,    0.0):{val_w}.3f}"
+                down  = f"{actions.get(Action.DOWN,  0.0):{val_w}.3f}"
+                left  = f"{actions.get(Action.LEFT,  0.0):{val_w}.3f}"
+                right = f"{actions.get(Action.RIGHT, 0.0):{val_w}.3f}"
+
+                top_row.append(f"{up:^{cell_w}}")
+                mid_row.append(f"{left} {right}")
+                bot_row.append(f"{down:^{cell_w}}")
+
+        rows.append(" ".join(top_row))
+        rows.append(" ".join(mid_row))
+        rows.append(" ".join(bot_row))
+
+        if r < env.size[0] - 1:
+            rows.append("")
+
+    return "\n".join(rows)
+
+
 def calc_action_probabilities(
     actions: list[Action], best_action: Action = None, epsilon: float = 1.0
 ) -> dict[Action, float]:
     """Calculates the probabilities of taking each action based on the epsilon-greedy policy."""
     probabilities = {}
 
-    p = epsilon / len(actions)
+    p = (epsilon / len(actions)) if best_action is not None else (1.0 / len(actions))
 
     for action in actions:
         probabilities[action] = 1 - epsilon + p if best_action is not None and action == best_action else p
@@ -82,7 +142,7 @@ def calc_best_policy_from_values(env: GridWorld, values: dict[State, float], gam
     return policy
 
 
-def calc_value_from_quality(q: dict[State, dict[Action, float]]) -> dict[State, float]:
+def calc_values_from_quality(q: dict[State, dict[Action, float]]) -> dict[State, float]:
     """Calculates state values from action values."""
 
     values = {}

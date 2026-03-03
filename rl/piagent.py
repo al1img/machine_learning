@@ -1,5 +1,7 @@
 """Policy Iteration Agent for GridWorld environment."""
 
+from collections import defaultdict
+
 from gridworld import Action, GridWorld, State
 
 
@@ -17,28 +19,40 @@ class PolicyIterationAgent:
         self._gamma = gamma
         self._theta = theta
         self._max_iters = max_iters
-        self._policy: dict[State, Action] = {}
+        self._policy: dict[State, Action] = defaultdict(lambda: self._env.actions[0])
+        self._values: dict[State, float] = defaultdict(float)
 
-    def train(self) -> tuple[int, dict[State, float], dict[State, Action]]:
+    def train(self) -> int:
         """Trains agent."""
-        values = {state: 0.0 for state in self._env.states}
-        iters = 0
+        total_iters = 0
 
         for state in self._env.states:
             if not self._env.is_terminal(state):
                 self._policy[state] = self._env.actions[0]
 
         while True:
-            i, values = self._evaluate_policy(values)
+            num_iters = self._evaluate_policy()
 
-            iters += i
+            total_iters += num_iters
 
-            if self._improve_policy(values):
+            if self._improve_policy():
                 break
 
-        return iters, values, self._policy
+        return total_iters
 
-    def _evaluate_policy(self, values: dict[State, float]) -> tuple[int, dict[State, float]]:
+    @property
+    def values(self) -> dict[State, float]:
+        """Returns state values."""
+        return dict(self._values)
+
+    @property
+    def policy(self) -> dict[State, Action]:
+        """Returns policy."""
+        return dict(self._policy)
+
+    def _evaluate_policy(self) -> int:
+        i = 0
+
         for i in range(self._max_iters):
             delta = 0.0
 
@@ -60,17 +74,18 @@ class PolicyIterationAgent:
                 value = 0.0
 
                 for transition in self._env.get_transition(state, action):
-                    value += transition.probability * (transition.reward + self._gamma * values[transition.next_state])
+                    value += transition.probability * (
+                        transition.reward + self._gamma * self._values[transition.next_state]
+                    )
 
-                delta = max(delta, abs(values[state] - value))
-                values[state] = value
-
+                delta = max(delta, abs(self._values[state] - value))
+                self._values[state] = value
             if delta < self._theta:
                 break
 
-        return i + 1, values
+        return i + 1
 
-    def _improve_policy(self, values: dict[State, float]) -> bool:
+    def _improve_policy(self) -> bool:
         policy_stable = True
 
         for state in self._env.states:
@@ -94,7 +109,9 @@ class PolicyIterationAgent:
                 value = 0.0
 
                 for transition in self._env.get_transition(state, action):
-                    value += transition.probability * (transition.reward + self._gamma * values[transition.next_state])
+                    value += transition.probability * (
+                        transition.reward + self._gamma * self._values[transition.next_state]
+                    )
 
                 if value > best_value:
                     best_value = value

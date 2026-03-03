@@ -37,13 +37,21 @@ Trade-off:
 
 * DP, TD, and Monte Carlo methods all use some variation of generalized policy iteration (GPI).
 
+### Actor-Critic
+
+* Combines policy-based (actor) and value-based (critic) methods.
+* **Critic** estimates V(s) using TD(0); **Actor** maintains action preferences h(s,a) updated by TD error.
+* Policy π(a|s) is derived via softmax over preferences — exploration is inherent, no epsilon needed.
+* The TD error δ = R + γV(s') − V(s) serves as the advantage signal that guides the actor.
+
 ## Comparison
 
-| Algorithm      | What it learns | Update rule                                                                   | Policy         |
-|----------------|----------------|-------------------------------------------------------------------------------|----------------|
-| **TD(0)**      | $V(s)$         | $V(s) \leftarrow V(s) + \alpha [R + \gamma V(s') - V(s)]$                     | Requires model |
-| **SARSA**      | $Q(s, a)$      | $Q(s,a) \leftarrow Q(s,a) + \alpha [R + \gamma Q(s', a') - Q(s,a)]$           | On-policy      |
-| **Q-Learning** | $Q(s, a)$      | $Q(s,a) \leftarrow Q(s,a) + \alpha [R + \gamma \max_{a'} Q(s', a') - Q(s,a)]$ | Off-policy     |
+| Algorithm        | What it learns | Update rule                                                                   | Policy         |
+|------------------|----------------|-------------------------------------------------------------------------------|----------------|
+| **TD(0)**        | $V(s)$         | $V(s) \leftarrow V(s) + \alpha [R + \gamma V(s') - V(s)]$                     | Requires model |
+| **SARSA**        | $Q(s, a)$      | $Q(s,a) \leftarrow Q(s,a) + \alpha [R + \gamma Q(s', a') - Q(s,a)]$           | On-policy      |
+| **Q-Learning**   | $Q(s, a)$      | $Q(s,a) \leftarrow Q(s,a) + \alpha [R + \gamma \max_{a'} Q(s', a') - Q(s,a)]$ | Off-policy     |
+| **Actor-Critic** | $V(s)$, $\pi$  | $\delta = R + \gamma V(s') - V(s)$; $V(s) \leftarrow V(s) + \alpha_v \delta$; $h(s,a) \leftarrow h(s,a) + \alpha_p \delta$ | On-policy |
 
 ## Key Differences
 
@@ -59,3 +67,6 @@ Trade-off:
 4. Invisible AI Guru Jii. ["Dynamic Programming, Policy Iteration, and Value Iteration in Reinforcement Learning"](https://medium.com/@apukumargiri1/dynamic-programming-policy-iteration-and-value-iteration-in-reinforcement-learning-675fee67905c). Medium.
 5. a7med3laa. ["DRL-Books-resources"](https://github.com/a7med3laa/DRL-Books-resources). Github.
 6. Invisible AI Guru Jii. ["Monte Carlo Methods in Reinforcement Learning"](https://medium.com/@apukumargiri1/monte-carlo-methods-in-reinforcement-learning-04a8e406b848)
+7. https://www.youtube.com/playlist?list=PLN8j_qfCJpNg5-6LcqGn_LZMyB99GoYba
+8. https://gibberblot.github.io/rl-notes/index.html
+9. https://lilianweng.github.io/posts/2018-04-08-policy-gradient/

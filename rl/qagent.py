@@ -25,17 +25,17 @@ class QLearningAgent:
         self._epsilon = epsilon
         self._max_steps = max_steps
         self._max_iters = max_iters
+        self._q: dict[State, dict[Action, float]] = defaultdict(lambda: defaultdict(float))
 
         # we can store only best action for each state and implement e-greedy policy in _generate_episode as:
         # random(epsilon) -> random action, else -> best action. But for generality, we will store the probabilities of
         # taking each action in each state, which allows us to implement more complex policies if needed.
         self._policy: dict[State, dict[Action, float]] = {}
 
-    def train(self) -> tuple[int, dict[State, float], dict[State, Action]]:
+    def train(self) -> int:
         """Trains agent."""
 
         iters = 0
-        q: dict[State, dict[Action, float]] = defaultdict(lambda: defaultdict(float))
 
         for _ in range(self._max_iters):
             state = self._get_start_state()
@@ -48,20 +48,38 @@ class QLearningAgent:
                 next_state = self._env.next_state(state, action)
                 reward = self._env.reward(state, action, next_state)
 
-                q[state][action] += self._alpha * (
-                    reward + self._gamma * max(q[next_state].values(), default=0.0) - q[state][action]
+                self._q[state][action] += self._alpha * (
+                    reward + self._gamma * max(self._q[next_state].values(), default=0.0) - self._q[state][action]
                 )
 
                 state = next_state
 
-            best_policy = utils.calc_best_policy_from_quality(q)
+            best_policy = utils.calc_best_policy_from_quality(self._q)
 
             for state, action in best_policy.items():
                 self._policy[state] = utils.calc_action_probabilities(self._env.actions, action, self._epsilon)
 
             iters += i
 
-        return iters, utils.calc_value_from_quality(q), best_policy
+        return iters
+
+    @property
+    def quality(self) -> dict[State, dict[Action, float]]:
+        """Returns the quality of state-action pairs."""
+
+        return self._q
+
+    @property
+    def values(self) -> dict[State, float]:
+        """Returns the values of states."""
+
+        return utils.calc_values_from_quality(self._q)
+
+    @property
+    def policy(self) -> dict[State, Action]:
+        """Returns the best action for each state according to the current policy."""
+
+        return utils.calc_best_policy_from_quality(self._q)
 
     def _get_start_state(self) -> State:
         """Gets a random non-terminal state to start an episode."""
