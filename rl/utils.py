@@ -1,6 +1,7 @@
 """Utils for the GridWorld environment agents."""
 
 import numpy as np
+from common import EpisodeItem
 from gridworld import Action, GridWorld, State
 
 
@@ -83,9 +84,9 @@ def format_quality(q: dict[State, dict[Action, float]], env: GridWorld) -> str:
                 mid_row.append(f"{'T':^{cell_w}}")
                 bot_row.append(" " * cell_w)
             else:
-                up    = f"{actions.get(Action.UP,    0.0):{val_w}.3f}"
-                down  = f"{actions.get(Action.DOWN,  0.0):{val_w}.3f}"
-                left  = f"{actions.get(Action.LEFT,  0.0):{val_w}.3f}"
+                up = f"{actions.get(Action.UP,    0.0):{val_w}.3f}"
+                down = f"{actions.get(Action.DOWN,  0.0):{val_w}.3f}"
+                left = f"{actions.get(Action.LEFT,  0.0):{val_w}.3f}"
                 right = f"{actions.get(Action.RIGHT, 0.0):{val_w}.3f}"
 
                 top_row.append(f"{up:^{cell_w}}")
@@ -171,3 +172,15 @@ def get_action(probabilities: dict[Action, float]) -> Action:
     probs = list(probabilities.values())
 
     return Action(np.random.choice(actions, p=probs))
+
+
+def calc_returns(episode: list[EpisodeItem], gamma: float) -> list[float]:
+    """Computes discounted returns Gₜ = Σₖ₌ₜ₊₁ᵀ γᵏ⁻ᵗ⁻¹ · Rₖ for each step."""
+    returns = [0.0] * len(episode)
+    g = 0.0
+
+    for t in reversed(range(len(episode))):
+        g = episode[t].reward + gamma * g
+        returns[t] = g
+
+    return returns

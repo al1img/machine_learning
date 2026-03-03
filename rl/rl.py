@@ -5,6 +5,7 @@ from gridworld import GridWorld
 from mcqagent import MonteCarloQAgent
 from mcvagent import MonteCarloValueAgent
 from pgagent import PolicyGradientAgent
+from pgbagent import PolicyGradientBaselineAgent
 from piagent import PolicyIterationAgent
 from qagent import QLearningAgent
 from sarsaagent import SARSAAgent
@@ -25,6 +26,8 @@ def main() -> None:
         SARSAAgent(env),
         QLearningAgent(env),
         PolicyGradientAgent(env),
+        PolicyGradientBaselineAgent(env),
+        ActorCriticAgent(env),
     )
 
     for agent in agents:

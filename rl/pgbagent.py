@@ -42,7 +42,7 @@ class PolicyGradientBaselineAgent:
             steps, episode = self._generate_episode()
             iters += steps
 
-            returns = self._compute_returns(episode)
+            returns = utils.calc_returns(episode, self._gamma)
 
             for t, item in enumerate(episode):
                 policy = self._softmax_policy(item.state)
@@ -77,18 +77,6 @@ class PolicyGradientBaselineAgent:
     def quality(self) -> dict[State, dict[Action, float]]:
         """Returns action preferences h(s,a) for each state-action pair."""
         return self._preferences
-
-    def _compute_returns(self, episode: list[EpisodeItem]) -> list[float]:
-        """Computes discounted returns Gₜ = Σ_{k=t+1}^{T} γ^{k-t-1} · R_k for each step."""
-
-        returns = [0.0] * len(episode)
-        g = 0.0
-
-        for t in reversed(range(len(episode))):
-            g = episode[t].reward + self._gamma * g
-            returns[t] = g
-
-        return returns
 
     def _softmax_policy(self, state: State) -> dict[Action, float]:
         """Computes π(·|s) via softmax over action preferences h(s, ·)."""

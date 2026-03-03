@@ -40,7 +40,7 @@ class PolicyGradientAgent:
             iters += steps
 
             # Compute returns for each step
-            returns = self._compute_returns(episode)
+            returns = utils.calc_returns(episode, self._gamma)
 
             for t, item in enumerate(episode):
                 policy = self._softmax_policy(item.state)
@@ -51,11 +51,11 @@ class PolicyGradientAgent:
                     g - self._values.get(item.state, 0.0)
                 )
 
-                # Policy gradient update: h(s,a) ← h(s,a) + α · γᵗ · Gₜ · (1 - π(a|s))
-                # The (1 - π(a|s)) term is the softmax policy gradient ∇ln π(a|s) for the selected action
-                self._preferences[item.state][item.action] += (
-                    self._alpha * (self._gamma**t) * g * (1 - policy[item.action])
-                )
+                # Policy gradient update: θ ← θ + α · γᵗ · Gₜ · ∇ln π(Aₜ|Sₜ, θ)
+                # Full softmax gradient: ∂ln π(Aₜ|s)/∂h(s,a) = 1{a=Aₜ} - π(a|s)
+                for a in self._env.actions:
+                    grad = (1.0 if a == item.action else 0.0) - policy[a]
+                    self._preferences[item.state][a] += self._alpha * (self._gamma**t) * g * grad
 
         return iters
 
@@ -73,18 +73,6 @@ class PolicyGradientAgent:
     def quality(self) -> dict[State, dict[Action, float]]:
         """Returns action preferences h(s,a) for each state-action pair."""
         return self._preferences
-
-    def _compute_returns(self, episode: list[EpisodeItem]) -> list[float]:
-        """Computes discounted returns Gₜ for each step in the episode."""
-
-        returns = [0.0] * len(episode)
-        g = 0.0
-
-        for t in reversed(range(len(episode))):
-            g = episode[t].reward + self._gamma * g
-            returns[t] = g
-
-        return returns
 
     def _softmax_policy(self, state: State) -> dict[Action, float]:
         """Computes π(·|s) via softmax over action preferences h(s, ·)."""
