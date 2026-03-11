@@ -1,24 +1,18 @@
+import json
 import math
 import random
 from collections import deque, namedtuple
+from datetime import datetime
 from itertools import count
 
 import gymnasium as gym
-import matplotlib
-import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from common import plot_result
 
 env = gym.make("CartPole-v1")
-
-# set up matplotlib
-is_ipython = "inline" in matplotlib.get_backend()
-if is_ipython:
-    from IPython import display
-
-plt.ion()
 
 # if GPU is to be used
 device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
@@ -133,28 +127,7 @@ def select_action(state):
 
 
 episode_durations = []
-
-
-def plot_durations():
-    plt.figure(1)
-    durations_t = torch.tensor(episode_durations, dtype=torch.float)
-    plt.title(
-        f"PyTorch DQN Result {seed=}\n{TAU=}, {LR=}, {BATCH_SIZE=}, {GAMMA=},\n{EPS_START=}, {EPS_END=}, {EPS_DECAY=}"
-    )
-    plt.xlabel("Episode")
-    plt.ylabel("Duration")
-    plt.plot(durations_t.numpy())
-    # Window mean (expanding until window is full, then sliding)
-    window = 100
-    cumsum = durations_t.cumsum(0)
-    means = torch.zeros(len(durations_t))
-    means[:window] = cumsum[:window] / torch.arange(1, min(window, len(durations_t)) + 1, dtype=torch.float)
-    if len(durations_t) > window:
-        means[window:] = (cumsum[window:] - cumsum[:-window]) / window
-    plt.plot(means.numpy())
-
-    if is_ipython:
-        display.display(plt.gcf())
+episode_epsilons = []
 
 
 def optimize_model():
@@ -213,6 +186,7 @@ for i_episode in range(num_episodes):
     # Initialize the environment and get its state
     state, info = env.reset()
     state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
+    epsilon = get_epsilon()
     for t in count():
         action = select_action(state)
         observation, reward, terminated, truncated, _ = env.step(action.item())
@@ -242,12 +216,36 @@ for i_episode in range(num_episodes):
         target_net.load_state_dict(target_net_state_dict)
 
         if done:
-            print(f"Episode {i_episode}: reward = {t+1}, epsilon = {get_epsilon():.3f}")
+            print(f"Episode {i_episode + 1}: reward = {t+1}, epsilon = {epsilon:.3f}")
             episode_durations.append(t + 1)
+            episode_epsilons.append(epsilon)
             break
 
 
 print("Complete")
-plot_durations()
-plt.ioff()
-plt.show()
+
+results = {
+    "params": {
+        "agent": "PyTorch DQN",
+        "optimizer": optimizer.__class__.__name__,
+        "seed": seed,
+        "BATCH_SIZE": BATCH_SIZE,
+        "GAMMA": GAMMA,
+        "EPS_START": EPS_START,
+        "EPS_END": EPS_END,
+        "EPS_DECAY": EPS_DECAY,
+        "TAU": TAU,
+        "LR": LR,
+    },
+    "rewards": episode_durations,
+    "epsilons": episode_epsilons,
+}
+
+filename = f"results/pytorchdqn_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+
+with open(filename, "w", encoding="utf-8") as f:
+    json.dump(results, f)
+
+print(f"Saved results to {filename}")
+
+plot_result(filename)
