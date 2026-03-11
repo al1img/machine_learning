@@ -1,5 +1,4 @@
 import json
-import math
 import random
 from collections import deque, namedtuple
 from datetime import datetime
@@ -80,13 +79,13 @@ class DQN(nn.Module):
 # TAU is the update rate of the target network
 # LR is the learning rate of the ``AdamW`` optimizer
 
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 GAMMA = 0.99
-EPS_START = 0.9
+EPS_START = 1.0
 EPS_END = 0.01
-EPS_DECAY = 2500
+EPS_DECAY = 0.98
 TAU = 0.005
-LR = 3e-4
+LR = 1e-3
 
 
 # Get number of actions from gym action space
@@ -101,22 +100,14 @@ target_net.load_state_dict(policy_net.state_dict())
 
 optimizer = optim.AdamW(policy_net.parameters(), lr=LR, amsgrad=True)
 memory = ReplayMemory(10000)
-
-
-steps_done = 0
-
-
-def get_epsilon():
-    global steps_done
-    return EPS_END + (EPS_START - EPS_END) * math.exp(-1.0 * steps_done / EPS_DECAY)
+epsilon = EPS_START
 
 
 def select_action(state):
-    global steps_done
+    global epsilon
+
     sample = random.random()
-    eps_threshold = get_epsilon()
-    steps_done += 1
-    if sample > eps_threshold:
+    if sample > epsilon:
         with torch.no_grad():
             # t.max(1) will return the largest column value of each row.
             # second column on max result is index of where max element was
@@ -186,7 +177,6 @@ for i_episode in range(num_episodes):
     # Initialize the environment and get its state
     state, info = env.reset()
     state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
-    epsilon = get_epsilon()
     for t in count():
         action = select_action(state)
         observation, reward, terminated, truncated, _ = env.step(action.item())
@@ -219,6 +209,7 @@ for i_episode in range(num_episodes):
             print(f"Episode {i_episode + 1}: reward = {t+1}, epsilon = {epsilon:.3f}")
             episode_durations.append(t + 1)
             episode_epsilons.append(epsilon)
+            epsilon = max(EPS_END, epsilon * EPS_DECAY)
             break
 
 
