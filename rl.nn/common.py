@@ -4,6 +4,7 @@ import json
 
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 
 
 def _window_mean(values, window=100):
@@ -46,3 +47,18 @@ def plot_result(file_name: str) -> None:
 
     plt.tight_layout()
     plt.show()
+
+
+def compute_returns(rewards: list[float], gamma: float) -> torch.Tensor:
+    """Computes discounted returns from a list of rewards."""
+    G, returns = 0.0, []
+
+    for r in reversed(rewards):
+        G = r + gamma * G
+        returns.insert(0, G)
+
+    returns = torch.tensor(returns, dtype=torch.float32)
+    # Normalize for variance reduction
+    returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+
+    return returns
