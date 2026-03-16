@@ -1,3 +1,5 @@
+"""DQNAgent: Deep Q-Network (DQN) agent implementation for discrete action spaces."""
+
 import json
 import random
 import time
@@ -76,7 +78,8 @@ class DQNAgent:
     HIDDEN_DIM = 128
     GAMMA = 0.99
     TAU = 0.005  # soft update coefficient: θ' ← τ·θ + (1-τ)·θ'
-    LR = 1e-3
+    UPDATE_STEPS = 0  # how often to update the target network
+    LR = 3e-4
 
     def __init__(self, env: gym.Env):
         self._env = env
@@ -102,6 +105,7 @@ class DQNAgent:
         self._reward_history: list[float] = []
         self._epsilon_history: list[float] = []
         self._current_episode = 0
+        self._current_step = 0
 
     def train(self) -> None:
         """Main training loop for the DQN agent."""
@@ -122,8 +126,9 @@ class DQNAgent:
                 done = terminated or truncated
 
                 # unclear shall done or terminated be used here: in PyTorch example they use terminated
-                self._buffer.push(EpisodeItem(state, action, reward, next_state, terminated))
+                self._buffer.push(EpisodeItem(state, action, reward, next_state, done))
                 self._train_step()
+                self._current_step += 1
                 self._update_target()
 
                 state = next_state
@@ -161,6 +166,29 @@ class DQNAgent:
         with open(file_name, "w", encoding="utf-8") as f:
             json.dump(results, f)
 
+    def play(self, num_episodes: int = 1) -> None:
+        """Runs the trained policy visually using the render_mode='human' environment."""
+        env = gym.make("CartPole-v1", render_mode="human")
+        self._policy_net.eval()
+
+        for episode in range(num_episodes):
+            state, _ = env.reset()
+            total_reward = 0.0
+            done = False
+
+            while not done:
+                with torch.no_grad():
+                    state_tensor = torch.from_numpy(state).float().unsqueeze(0)
+                    action = int(self._policy_net(state_tensor).argmax(dim=1).item())
+
+                state, reward, terminated, truncated, _ = env.step(action)
+                done = terminated or truncated
+                total_reward += reward
+
+            print(f"Play episode {episode + 1}: reward = {total_reward:.1f}")
+
+        env.close()
+
     def _select_action(self, state: np.ndarray, epsilon: float) -> int:
         if random.random() > epsilon:
             with torch.no_grad():
@@ -194,12 +222,16 @@ class DQNAgent:
         loss = nn.functional.smooth_l1_loss(q_values, targets)
         self._optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_value_(self._policy_net.parameters(), 100)
+        # torch.nn.utils.clip_grad_value_(self._policy_net.parameters(), 100)
         self._optimizer.step()
 
     def _update_target(self) -> None:
-        for policy_param, target_param in zip(self._policy_net.parameters(), self._target_net.parameters()):
-            target_param.data.copy_(self.TAU * policy_param.data + (1.0 - self.TAU) * target_param.data)
+        if self.UPDATE_STEPS:
+            if self._current_step % self.UPDATE_STEPS == 0:
+                self._target_net.load_state_dict(self._policy_net.state_dict())
+        else:
+            for policy_param, target_param in zip(self._policy_net.parameters(), self._target_net.parameters()):
+                target_param.data.copy_(self.TAU * policy_param.data + (1.0 - self.TAU) * target_param.data)
 
 
 if __name__ == "__main__":
@@ -213,3 +245,5 @@ if __name__ == "__main__":
     print(f"Saved results to {filename}")
 
     plot_result(filename)
+
+    agent.play()
