@@ -17,3 +17,4 @@ https://github.com/Finspire13/pytorch-policy-gradient-example
 https://github.com/tims457/RL_Agent_Notebooks
 https://becominghuman.ai/lets-build-an-atari-ai-part-0-intro-to-rl-9b2c5336e0ec
 https://aigreeks.com/solve-cartpole-v1-in-open-gym-reinforcement-learning/
+https://medium.com/nerd-for-tech/policy-gradients-reinforce-with-baseline-6c871a3a068

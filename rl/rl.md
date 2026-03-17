@@ -70,3 +70,5 @@ Trade-off:
 7. https://www.youtube.com/playlist?list=PLN8j_qfCJpNg5-6LcqGn_LZMyB99GoYba
 8. https://gibberblot.github.io/rl-notes/index.html
 9. https://lilianweng.github.io/posts/2018-04-08-policy-gradient/
+10. https://people.cs.umass.edu/~barto/courses/cs687/williams92simple.pdf
+11. https://medium.com/@jerryjohnthomas/list/reinforcement-learning-series-season-1-6fc57525318e
