@@ -36,10 +36,10 @@ class PGAgent:
     """Policy Gradient (PG) agent for discrete action spaces using REINFORCE algorithm."""
 
     SEED = 42
-    NUM_EPISODES = 500
+    NUM_EPISODES = 1000
     HIDDEN_DIM = 128
     GAMMA = 0.99
-    LR = 1e-2
+    LR = 5e-3
     SOLVE_THRESHOLD = 475.0
     SOLVE_WINDOW = 100
 
@@ -67,10 +67,15 @@ class PGAgent:
         """Main training loop for the PG agent."""
 
         start_time = time.monotonic()
+        self._policy_net.train()
 
         for episode in range(self.NUM_EPISODES):
             rewards, log_probs = self._run_episode()
             returns = compute_returns(rewards, self.GAMMA)
+
+            # Normalize for variance reduction. This actually, average returns as baseline plus scaling by std,
+            # is a common trick to stabilize training.
+            returns = (returns - returns.mean()) / (returns.std() + 1e-9)
 
             self._update(log_probs, returns)
 
@@ -80,9 +85,8 @@ class PGAgent:
             print(f"Episode {episode + 1}: reward = {total_reward:.1f}")
 
             window = self._reward_history[-self.SOLVE_WINDOW :]
-            avg = np.mean(window)
 
-            if len(window) == self.SOLVE_WINDOW and avg >= self.SOLVE_THRESHOLD:
+            if len(window) == self.SOLVE_WINDOW and np.mean(window) >= self.SOLVE_THRESHOLD:
                 break
 
         print(f"Training completed in {time.monotonic() - start_time:.2f} seconds at episode {episode + 1}.")

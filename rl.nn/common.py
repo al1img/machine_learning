@@ -57,8 +57,4 @@ def compute_returns(rewards: list[float], gamma: float) -> torch.Tensor:
         G = r + gamma * G
         returns.insert(0, G)
 
-    returns = torch.tensor(returns, dtype=torch.float32)
-    # Normalize for variance reduction
-    returns = (returns - returns.mean()) / (returns.std() + 1e-8)
-
-    return returns
+    return torch.tensor(returns, dtype=torch.float32)
