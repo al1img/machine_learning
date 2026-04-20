@@ -8,7 +8,7 @@ from datetime import datetime
 import gymnasium as gym
 import numpy as np
 import torch
-import torch.distributions as distr
+import torch.distributions as dists
 import torch.nn as nn
 from common import compute_returns, plot_result
 
@@ -135,7 +135,7 @@ class PGAgent:
     def _select_action(self, state: np.ndarray) -> tuple[int, torch.Tensor]:
         state_tensor = torch.from_numpy(state).float().unsqueeze(0)
         logits = self._policy_net(state_tensor)
-        dist = distr.Categorical(logits=logits)
+        dist = dists.Categorical(logits=logits)
         action = dist.sample()
 
         return action.item(), dist.log_prob(action)
