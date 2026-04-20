@@ -18,3 +18,17 @@ https://github.com/tims457/RL_Agent_Notebooks
 https://becominghuman.ai/lets-build-an-atari-ai-part-0-intro-to-rl-9b2c5336e0ec
 https://aigreeks.com/solve-cartpole-v1-in-open-gym-reinforcement-learning/
 https://medium.com/nerd-for-tech/policy-gradients-reinforce-with-baseline-6c871a3a068
+https://medium.com/@sachith.icc/mastering-cartpole-a-complete-journey-through-6-reinforcement-learning-algorithms-06d92fa6d601
+https://lilianweng.github.io/posts/2018-04-08-policy-gradient/
+https://medium.com/data-science/understanding-actor-critic-methods-931b97b6df3f
+https://www.tensorflow.org/tutorials/reinforcement_learning/actor_critic
+https://docs.pytorch.org/tutorials/intermediate/reinforcement_ppo.html
+https://medium.com/@felix.verstraete/mastering-proximal-policy-optimization-ppo-in-reinforcement-learning-230bbdb7e5e7
+https://www.datacamp.com/tutorial/proximal-policy-optimization
+https://docs.cleanrl.dev/rl-algorithms/ppo/
+https://stable-baselines3.readthedocs.io/en/master/
+https://github.com/Chris-hughes10/simple-ppo
+https://shivang-ahd.medium.com/generalized-advantage-estimation-a-deep-dive-into-bias-variance-and-policy-gradients-a5e0b3454dad
+https://apxml.com/courses/advanced-reinforcement-learning
+https://arxiv.org/pdf/1707.06347
+https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/
